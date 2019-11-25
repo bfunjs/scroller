@@ -1,0 +1,35 @@
+{
+  "name": "@bfunjs/scroller",
+  "version": "1.0.0",
+  "description": "@bfunjs/scroller",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && npm run compile",
+    "clean": "rimraf lib",
+    "compile": "ncp src lib && BABEL_ENV=common babel lib -d lib",
+    "release": "npm publish --access public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bfunjs/scroller.git"
+  },
+  "keywords": [
+    "bfunjs",
+    "scroller"
+  ],
+  "author": "suibinc@qq.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bfunjs/scroller/issues"
+  },
+  "homepage": "https://github.com/bfunjs/scroller#readme",
+  "devDependencies": {
+    "@babel/cli": "7",
+    "@babel/core": "7",
+    "@babel/plugin-proposal-class-properties": "7",
+    "@babel/preset-env": "7",
+    "babel-loader": "8",
+    "ncp": "2",
+    "rimraf": "3"
+  }
+}
