@@ -52,7 +52,7 @@ const defaultOptions = {
     handler: v => v
 };
 
-class BasicScroller {
+class Scroll {
 
     /** {Boolean} 是否单指触摸 */
     __isSingleTouch = false;
@@ -684,4 +684,4 @@ class BasicScroller {
     }
 }
 
-export default BasicScroller;
+export default Scroll;

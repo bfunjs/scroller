@@ -1,8 +1,8 @@
 {
   "name": "@bfunjs/scroller",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "@bfunjs/scroller",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "npm run clean && npm run compile",
     "clean": "rimraf lib",
