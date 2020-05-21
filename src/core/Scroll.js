@@ -271,15 +271,15 @@ class Scroll {
         if (typeof onChange === 'function') {
             let _left = left;
             let _top = top;
-            if (this.options.bouncingX > 0) {
+            if (this.options.bouncingX > 0 && this.__contentWidth > this.__clientWidth) {
                 _left = _left < 0
                     ? Math.max(_left, -this.options.bouncingX)
-                    : Math.min(_left, this.__contentWidth + this.options.bouncingX);
+                    : Math.min(_left, this.__contentWidth - this.__clientWidth + this.options.bouncingX);
             }
-            if (this.options.bouncingY > 0) {
+            if (this.options.bouncingY > 0 && this.__contentHeight > this.__clientHeight) {
                 _top = _top < 0
                     ? Math.max(_top, -this.options.bouncingY)
-                    : Math.min(_top, this.__contentHeight + this.options.bouncingY);
+                    : Math.min(_top, this.__contentHeight - this.__clientHeight + this.options.bouncingY);
             }
             onChange(_left, _top, zoom);
         }
