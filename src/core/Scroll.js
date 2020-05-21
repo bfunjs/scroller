@@ -19,6 +19,12 @@ const defaultOptions = {
     /** 允许回弹 */
     bouncing: true,
 
+    /** X轴最大回弹值，<=0则无限制，单位：px */
+    bouncingX: 0,
+
+    /** Y轴最大回弹值，<=0则无限制，单位：px */
+    bouncingY: 0,
+
     /** 滚动锁定，即只允许在主轴滚动，适用于移动端 */
     locking: true,
 
@@ -263,7 +269,19 @@ class Scroll {
     __change(left, top, zoom) {
         const { onChange } = this.options;
         if (typeof onChange === 'function') {
-            onChange(left, top, zoom);
+            let _left = left;
+            let _top = top;
+            if (this.options.bouncingX > 0) {
+                _left = _left < 0
+                    ? Math.max(_left, -this.options.bouncingX)
+                    : Math.min(_left, this.__contentWidth + this.options.bouncingX);
+            }
+            if (this.options.bouncingY > 0) {
+                _top = _top < 0
+                    ? Math.max(_top, -this.options.bouncingY)
+                    : Math.min(_top, this.__contentHeight + this.options.bouncingY);
+            }
+            onChange(_left, _top, zoom);
         }
     }
 
@@ -537,7 +555,7 @@ class Scroll {
      */
     zoomTo(level, animate, originLeft, originTop, callback) {
         if (!this.options.zooming) {
-            throw new Error("Zooming is not enabled!");
+            throw new Error('Zooming is not enabled!');
         }
 
         if (callback) {
@@ -612,7 +630,7 @@ class Scroll {
         // Correct coordinates based on new zoom level
         if (zoom != null && zoom !== this.__zoomLevel) {
             if (!this.options.zooming) {
-                throw new Error("Zooming is not enabled!");
+                throw new Error('Zooming is not enabled!');
             }
             left *= zoom;
             top *= zoom;
