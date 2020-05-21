@@ -19,6 +19,12 @@ const defaultOptions = {
     /** 允许回弹 */
     bouncing: true,
 
+    /** X轴最大回弹值，<=0则无限制，单位：px */
+    bouncingX: 0,
+
+    /** Y轴最大回弹值，<=0则无限制，单位：px */
+    bouncingY: 0,
+
     /** 滚动锁定，即只允许在主轴滚动，适用于移动端 */
     locking: true,
 
@@ -40,20 +46,20 @@ const defaultOptions = {
     /** 滚动速度 **/
     speedMultiplier: 1,
 
-    /** 在触摸或减速结束时触发的回调，前提是尚未开始其他滚动操作，主要用于通知滚动条淡出 */
-    scrollingComplete: v => v,
-
     /** 到达边界时应用于减速的变化量 **/
     penetrationDeceleration: 0.03,
 
     /** 到达边界时应用于加速的变化量 **/
     penetrationAcceleration: 0.08,
 
-    handler: v => v
+    /** 在触摸或是缩放时触发的回调 */
+    onChange: v => v,
+
+    /** 在触摸或减速结束时触发的回调，前提是尚未开始其他滚动操作，主要用于通知滚动条淡出 */
+    onScrollingComplete: v => v
 };
 
 class Scroll {
-
     /** {Boolean} 是否单指触摸 */
     __isSingleTouch = false;
 
@@ -191,7 +197,6 @@ class Scroll {
      */
     __publish(left, top, zoom, animate) {
         const self = this;
-        const { handler } = this.options;
         const wasAnimating = this.__isAnimating;
         if (wasAnimating) {
             this.animate.stop(wasAnimating);
@@ -218,9 +223,7 @@ class Scroll {
                     self.__zoomLevel = oldZoom + (diffZoom * percent);
 
                     // Push values out
-                    if (typeof handler === 'function') {
-                        handler(self.__scrollLeft, self.__scrollTop, self.__zoomLevel);
-                    }
+                    self.__change(self.__scrollLeft, self.__scrollTop, self.__zoomLevel);
                 }
             };
 
@@ -233,7 +236,7 @@ class Scroll {
                     self.__isAnimating = false;
                 }
                 if (self.__didDecelerationComplete || wasFinished) {
-                    self.options.scrollingComplete();
+                    self.options.onScrollingComplete();
                 }
 
                 if (self.options.zooming) {
@@ -251,9 +254,7 @@ class Scroll {
             this.__scheduledTop = this.__scrollTop = top;
             this.__scheduledZoom = this.__zoomLevel = zoom;
 
-            if (typeof handler === 'function') {
-                handler(left, top, zoom);
-            }
+            self.__change(left, top, zoom);
 
             if (this.options.zooming) {
                 this.__computeScrollMax();
@@ -262,6 +263,25 @@ class Scroll {
                     this.__zoomComplete = null;
                 }
             }
+        }
+    }
+
+    __change(left, top, zoom) {
+        const { onChange } = this.options;
+        if (typeof onChange === 'function') {
+            let _left = left;
+            let _top = top;
+            if (this.options.bouncingX > 0) {
+                _left = _left < 0
+                    ? Math.max(_left, -this.options.bouncingX)
+                    : Math.min(_left, this.__contentWidth + this.options.bouncingX);
+            }
+            if (this.options.bouncingY > 0) {
+                _top = _top < 0
+                    ? Math.max(_top, -this.options.bouncingY)
+                    : Math.min(_top, this.__contentHeight + this.options.bouncingY);
+            }
+            onChange(_left, _top, zoom);
         }
     }
 
@@ -321,7 +341,7 @@ class Scroll {
         const completed = function (renderedFramesPerSecond, animationId, wasFinished) {
             self.__isDecelerating = false;
             if (self.__didDecelerationComplete) {
-                self.options.scrollingComplete();
+                self.options.onScrollingComplete();
             }
             self.scrollTo(self.__scrollLeft, self.__scrollTop, self.options.snapping);
         };
@@ -535,7 +555,7 @@ class Scroll {
      */
     zoomTo(level, animate, originLeft, originTop, callback) {
         if (!this.options.zooming) {
-            throw new Error("Zooming is not enabled!");
+            throw new Error('Zooming is not enabled!');
         }
 
         if (callback) {
@@ -610,7 +630,7 @@ class Scroll {
         // Correct coordinates based on new zoom level
         if (zoom != null && zoom !== this.__zoomLevel) {
             if (!this.options.zooming) {
-                throw new Error("Zooming is not enabled!");
+                throw new Error('Zooming is not enabled!');
             }
             left *= zoom;
             top *= zoom;
@@ -651,7 +671,6 @@ class Scroll {
             animate = false;
         }
 
-        // Publish new values
         if (!this.__isTracking) {
             this.__publish(left, top, zoom, animate);
         }
@@ -665,8 +684,8 @@ class Scroll {
      * @param animate {Boolean ? false} Whether to animate the given change
      */
     scrollBy(left, top, animate) {
-        let startLeft = this.__isAnimating ? this.__scheduledLeft : this.__scrollLeft;
-        let startTop = this.__isAnimating ? this.__scheduledTop : this.__scrollTop;
+        const startLeft = this.__isAnimating ? this.__scheduledLeft : this.__scrollLeft;
+        const startTop = this.__isAnimating ? this.__scheduledTop : this.__scrollTop;
 
         this.scrollTo(startLeft + (left || 0), startTop + (top || 0), animate);
     }

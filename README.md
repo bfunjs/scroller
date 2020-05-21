@@ -8,7 +8,7 @@ const container = document.getElementById('container');
 
 const myScroller = new Scroller({
     scrollingY: false,
-    handler: function (left, top) {
+    onChange: function (left, top) {
         console.log(left, top);
         container.style.left = `${-left}px`
     }

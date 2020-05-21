@@ -256,13 +256,13 @@ class Scroller extends Scroll {
                             this.__startDeceleration(timeStamp);
                         }
                     } else {
-                        this.options.scrollingComplete();
+                        this.options.onScrollingComplete();
                     }
                 } else {
-                    this.options.scrollingComplete();
+                    this.options.onScrollingComplete();
                 }
             } else if ((timeStamp - this.__lastTouchMove) > 100) {
-                this.options.scrollingComplete();
+                this.options.onScrollingComplete();
             }
         }
 
@@ -275,7 +275,7 @@ class Scroller extends Scroll {
                 }
             } else {
                 if (this.__interruptedAnimation || this.__isDragging) {
-                    this.options.scrollingComplete();
+                    this.options.onScrollingComplete();
                 }
                 this.scrollTo(this.__scrollLeft, this.__scrollTop, true, this.__zoomLevel);
 
